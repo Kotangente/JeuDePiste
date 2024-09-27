@@ -1,9 +1,10 @@
 from os import environ as env
 
-from flask import Flask, request, make_response, redirect, url_for, render_template_string
+from flask import Flask, request, make_response, redirect, url_for
 from dotenv import load_dotenv
-from Crypto.Cipher import AES
-import sqlite3
+
+from database import DB
+from utils import render, verify_login, ERROR, INCORRECT_PASSWORD
 
 
 app = Flask(__name__)
@@ -11,12 +12,12 @@ load_dotenv()
 
 secret_url = env["SECRET_URL"]
 admin_password = env["ADMIN_PASSWORD"]
-crypt_key = bytes(env["ENCRYPTION_KEY"], "utf-8")
 assets_path = env["ASSETS_PATH"]
 static_path = env["STATIC_PATH"]
 database_path = env["DATABASE_PATH"]
 
-database_connection = sqlite3.connect(database_path)
+db = DB(database_path)
+hashed_password = str(hash(admin_password))
 
 
 @app.get("/")
@@ -26,19 +27,23 @@ def root():
 
 @app.get(secret_url)
 def admin_access():
-	return '''
-	<form action="/login" method="POST">
+	error = ERROR.get(int(request.args.get("error", "")), "")
+	return f"""
+	<form action="{secret_url}/login" method="POST">
 		<label for="password">Enter Admin Password:</label><br>
-		<input type="password" id="password" name="password" placeholder="password">
+		<input type="password" name="password" placeholder="password">
 		<input type="submit" value="enter">
 	</form>
-'''
+	<p id="error-message">{error}</p>
+"""
 
 
-@app.post("/login")
+@app.post(f"{secret_url}/login")
 def login():
-	resp = make_response(redirect(url_for(secret_url)))
-	resp.set_cookie("LeChantDuKotangente", )
+	if request.form.get("password") != admin_password:
+		return redirect(url_for("admin_access")+"?error=%d"%INCORRECT_PASSWORD)
+	resp = make_response(redirect(url_for("root")))
+	resp.set_cookie("LeChantDuKotangente", hashed_password)
 	return resp
 
 
@@ -62,8 +67,7 @@ def get_static(subpath):
 
 @app.get("/enigme/<string:name>/question")
 def enigme(name):
-	file_content = open("templates/enigme.html", "r").read()
-	return render_template_string(file_content, name=name)
+	return render("enigme.html", name=name)
 
 
 @app.post("/enigme/<string:name>/answer")
