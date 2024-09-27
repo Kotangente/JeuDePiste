@@ -3,3 +3,4 @@
 ### TODO
 - [ ] Faire tableaux
 - [ ] SHA256 pour le hashage du mot de passe
+- [ ] Page d'accueil
