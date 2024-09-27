@@ -1,0 +1,24 @@
+<html>
+	<head>
+		<title>Jeu de KAP'iste</title>
+		<script src="/assets/js/htmx.min.js"></script>
+		<link rel="stylesheet" href="/assets/styles/style.css"/>
+	</head>
+	<body>
+		<h1>Créons une énigme!!!</h1>
+		<form hx-post="/enigme/create" hx-target=".result-box" hx-swap="innerHTML" enctype="multipart/form-data">
+			<label for="name">Nom de l'énigme</label><br>
+			<input type="text" name="name" placeholder="Kotangénigme" required><br>
+			<label for="question">Énoncé de l'énigme <small>(optionnel)</small></label><br>
+			<input type="text" name="question" placeholder="Combien y a-t-il de filles au Kotangente?"><br>
+			<label for="image">Énoncé en image <small>(optionnel)</small></label><br>
+			<input type="file" name="image"><br>
+			<label for="answer">Réponse attendue <small>(optionnel)</small></label><br>
+			<input type="text" name="answer" placeholder="QUATRE"><br>
+			<input type="submit" value="Créer">
+		</form>
+		<div class="result-box">
+
+		</div>
+	</body>
+</html>

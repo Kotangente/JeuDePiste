@@ -6,17 +6,17 @@ class DB:
 		self.connection = sqlite3.connect(db_path)
 		self.cursor = self.connection.cursor()
 
-	def add_enigme(self, name: str, input_type: str, question: str):
+	def add_enigme(self, name: str, input_type: str, question: str="", answer: str="", success: str=""):
 		self.cursor.execute("""
-			INSERT INTO enigmes (name, input_type, question)
-			VALUES (?, ?, ?)
-		""", (name, input_type, question))
+			INSERT INTO enigmes (name, input_type, question, answer, success_message)
+			VALUES (?, ?, ?, ?, ?)
+		""", (name, input_type, question, answer, success))
 
 		self.connection.commit()
 
 	def get_enigme(self, name: str) -> tuple:
 		res = self.cursor.execute("""
-			SELECT name, input_type, question
+			SELECT input_type, question, answer, success_message
 			FROM enigmes
 			WHERE name = ?
 		""", (name,))

@@ -1,18 +1,21 @@
 <html>
-	<script src="/assets/js/htmx.min.js"></script>
+	
 	<head>
 		<title>
 			{{ name }}
 		</title>
+		<script src="/assets/js/htmx.min.js"></script>
+		<link rel="stylesheet" href="/assets/styles/style.css"/>
 	</head>
 	<body>
 		<h1>{{name}}</h1>
-		<form hx-post="answer" hx-target="#answer" hx-swap="innerHTML">
-			<label for="resp">HELLO</label>
-			<input type="text" id="resp" name="resp">
+		<form hx-post="answer" hx-target=".result-box" hx-swap="innerHTML" enctype="multipart/form-data">
+			<label for="resp">{{question}}</label>
+			{% if image %}
+			<img src="/data/images/enigme_{{name}}.png" alt="énigme">
+			{% endif %}
+			<input type="{{input_type}}" name="resp">
 		</form>
-		<div id="answer">
-
-		</div>
+		<div class="result-box"></div>
 	</body>
 </html>
