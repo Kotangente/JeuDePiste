@@ -4,7 +4,7 @@ from flask import Flask, request, make_response, redirect, url_for
 from dotenv import load_dotenv
 
 from database import DB
-from utils import render, verify_login, ERROR, INCORRECT_PASSWORD
+from utils import render, verify_login, file_content, ERROR, INCORRECT_PASSWORD
 
 
 app = Flask(__name__)
@@ -12,7 +12,6 @@ load_dotenv()
 
 secret_url = env["SECRET_URL"]
 admin_password = env["ADMIN_PASSWORD"]
-assets_path = env["ASSETS_PATH"]
 static_path = env["STATIC_PATH"]
 database_path = env["DATABASE_PATH"]
 
@@ -22,12 +21,12 @@ hashed_password = str(hash(admin_password))
 
 @app.get("/")
 def root():
-	return redirect("index.html")
+	return get_static("/")
 
 
 @app.get(secret_url)
 def admin_access():
-	error = ERROR.get(int(request.args.get("error", "")), "")
+	error = ERROR.get(int(request.args.get("error", 0)), "")
 	return f"""
 	<form action="{secret_url}/login" method="POST">
 		<label for="password">Enter Admin Password:</label><br>
@@ -42,27 +41,26 @@ def admin_access():
 def login():
 	if request.form.get("password") != admin_password:
 		return redirect(url_for("admin_access")+"?error=%d"%INCORRECT_PASSWORD)
-	resp = make_response(redirect(url_for("root")))
+	resp = make_response(redirect(url_for("admin")))
 	resp.set_cookie("LeChantDuKotangente", hashed_password)
 	return resp
 
 
-@app.get("/assets/<path:subpath>")
-def get_asset(subpath):
-	f = open(f"{assets_path}/{subpath}")
-	content = f.read()
-	f.close()
-
-	return content
+@app.get("/admin/")
+@app.get("/admin/<path:subpath>")
+def admin(subpath=""):
+	if not verify_login(request.cookies, hashed_password):
+		return redirect(url_for("root"))
+	return get_static("/admin/" + subpath)
 
 
 @app.get("/<path:subpath>")
 def get_static(subpath):
-	f = open(f"{static_path}/{subpath}")
-	content = f.read()
-	f.close()
-
-	return content
+	path = f"{static_path.removesuffix('/')}/{subpath}"
+	try:
+		return file_content(path)
+	except IsADirectoryError:
+		return file_content(path.removesuffix("/") + "/index.html")
 
 
 @app.get("/enigme/<string:name>/question")

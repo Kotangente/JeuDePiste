@@ -15,3 +15,7 @@ def render(path: str, **kwargs):
 
 def verify_login(cookies: dict[str, str], password: str):
 	return cookies.get("LeChantDuKotangente") == password
+
+
+def file_content(path: str) -> bytes:
+	return open(path, "r+b").read()
