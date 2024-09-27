@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
 from database import DB
+import enigmes
 from utils import render, verify_login, file_content, ERROR, INCORRECT_PASSWORD
 
 
@@ -71,51 +72,27 @@ def create_enigme():
 	if not verify_login(request.cookies, hashed_password):
 		redirect(url_for("root"))
 
-	form = request.form
-	name = form.get("name")
-	question = form.get("question")
-	answer = form.get("answer")
-
-	image = request.files.get("image")
-	if image is not None:
-		extension = image.filename.split(".")[-1]
-		image.save(f"{data_path}images/enigme_{secure_filename(name)}.{extension}")
-
-	input_type = "text"
-	if answer == "":
-		input_type = "none"
-	elif answer.isnumeric():
-		input_type = "number"
-	elif answer == "%%IMAGE%%":
-		input_type = "file"
-
 	db = DB(db_path)
 	try:
-		db.add_enigme(name, input_type, question, answer)
+		return enigmes.create(request, db)
 	finally:
 		db.connection.close()
-
-	return "O.K.! <a href='index.html'>return</a>"
 
 
 @app.get("/enigme/<string:name>")
 def get_enigme(name):
 	db = DB(db_path)
-	
 	try:
-		input_type, question, _, _ = db.get_enigme(name)
+		return enigmes.get(name, db)
+	finally:
+		db.connection.close()
 
-		image = True
-		try:
-			f = open(data_path+"images/"+"enigme_"+secure_filename(name)+".png")
-			f.close()
-		except:
-			image = False
-		return render("enigme.html",
-				name=name,
-				input_type=input_type,
-				question=question,
-				image=image)
+
+@app.post("/enigme/<string:name>/answer")
+def answer_enigme(name):
+	db = DB(db_path)
+	try:
+		return enigmes.answer(name, request, db)
 	finally:
 		db.connection.close()
 

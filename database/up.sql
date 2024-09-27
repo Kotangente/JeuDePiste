@@ -18,4 +18,6 @@ CREATE TABLE reponses (
 
 CREATE TABLE teams (
 	name VARCHAR(255) PRIMARY KEY
-)
+);
+
+INSERT INTO teams VALUES ("Sans Team");
