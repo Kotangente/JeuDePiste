@@ -1,0 +1,18 @@
+<html>
+	<script src="/assets/js/htmx.min.js"></script>
+	<head>
+		<title>
+			{{ name }}
+		</title>
+	</head>
+	<body>
+		<h1>{{name}}</h1>
+		<form hx-post="answer" hx-target="#answer" hx-swap="innerHTML">
+			<label for="resp">HELLO</label>
+			<input type="text" id="resp" name="resp">
+		</form>
+		<div id="answer">
+
+		</div>
+	</body>
+</html>
