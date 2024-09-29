@@ -133,7 +133,7 @@ def team_data_page(name):
 
 @app.get("/infos/enigmes/<string:name>")
 def get_enigme_data(name):
-	return enigmes.render_table_enigme(name)
+	return enigmes.render_table_enigmes(name)
 
 
 @app.get("/infos/teams/<string:name>")

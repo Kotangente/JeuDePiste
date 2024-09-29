@@ -6,7 +6,7 @@ body {
 	flex-direction: column;
 }
 
-table, th, td {
+table.data, th, td {
 	border: 1px solid;
 }
 

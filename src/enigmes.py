@@ -1,6 +1,6 @@
 from os import environ as env
 import time
-import datetime
+from datetime import datetime
 
 from werkzeug.utils import secure_filename
 from flask import Request
