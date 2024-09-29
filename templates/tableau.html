@@ -7,10 +7,10 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% for row in rows %}
+		{% for row in rows|sort %}
 		<tr>
 			{% for elem in row %}
-			<td>{{elem}}</td>
+			<td>{{elem|safe}}</td>
 			{% endfor %}
 		</tr>
 		{% endfor %}

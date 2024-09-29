@@ -1,12 +1,11 @@
 from os import environ as env
-from pathlib import Path
 from hashlib import sha256
 
-from flask import Flask, request, make_response, redirect, url_for
+from flask import Flask, request, make_response, redirect, url_for, g
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
-from database import DB
+import database as DB
 import enigmes
 from utils import render, verify_login, file_content, ERROR, INCORRECT_PASSWORD
 
@@ -22,6 +21,13 @@ data_path = env["DATABASE_PATH"]
 db_path = data_path+"data.db"
 
 hashed_password = sha256(bytes(admin_password, "utf-8")).hexdigest()
+
+
+@app.teardown_appcontext
+def close_connection(exception):
+	db = getattr(g, "_database", None)
+	if db is not None:
+		db.close()
 
 
 @app.get("/")
@@ -83,34 +89,61 @@ def create_enigme():
 	if not verify_login(request.cookies, hashed_password):
 		redirect(url_for("root"))
 
-	db = DB(db_path)
-	try:
-		return enigmes.create(request, db)
-	finally:
-		db.connection.close()
+	return enigmes.create(request)
 
 
 @app.get("/enigme/<string:name>")
 def get_enigme(name):
-	db = DB(db_path)
-	try:
-		return enigmes.get(name, db)
-	finally:
-		db.connection.close()
+	return enigmes.get(name)
 
 
 @app.post("/enigme/<string:name>/answer")
 def answer_enigme(name):
-	db = DB(db_path)
-	try:
-		return enigmes.answer(name, request, db)
-	finally:
-		db.connection.close()
+	return enigmes.answer(name, request)
 
 
 @app.get("/enigme/<string:name>/status")
 def status_enigme(name):
 	return "<div class='correct'>t'as déjà résolu batard</div>"
+
+
+@app.get("/enigmes")
+def get_enigmes():
+	return "".join([f"<tr><td><a href='{url_for('enigme_data_page', name=enigme)}'>{enigme}</a></td>"\
+				 f"<td><button hx-delete='/enigme/{enigme}'"\
+				 f"hx-confirm='Supprimer l'énigme \"{enigme}\"?'>delete</button></td></tr>"
+				 for enigme in DB.get_enigmes()])
+
+
+@app.get("/teams")
+def get_teams():
+	return "".join([f"<li><a href='{url_for('team_data_page', name=team)}'>{team}</a></li>"
+				 for team in DB.get_teams()])
+
+
+@app.get("/admin/enigmes/<string:name>")
+def enigme_data_page(name):
+	return render("infos.html", name=name, type="enigmes")
+
+
+@app.get("/admin/teams/<string:name>")
+def team_data_page(name):
+	return render("infos.html", name=name, type="teams", team=True)
+
+
+@app.get("/infos/enigmes/<string:name>")
+def get_enigme_data(name):
+	return enigmes.render_table_enigme(name)
+
+
+@app.get("/infos/teams/<string:name>")
+def get_team_data(name):
+	return enigmes.render_table_team(name)
+
+
+@app.delete("/enigme/<string:name>")
+def delete_enigme(name):
+	DB.delete_enigme(name)
 
 
 @app.get("/data/images/<path:subpath>")

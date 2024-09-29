@@ -1,17 +1,18 @@
 from os import environ as env
 import time
+import datetime
 
 from werkzeug.utils import secure_filename
 from flask import Request
 
-from database import DB
+import database as db
 from utils import render
 
 
 data_path = env["DATABASE_PATH"]
 
 
-def create(request: Request, db: DB):
+def create(request: Request):
 	form = request.form
 	name = form.get("name")
 	question = form.get("question")
@@ -33,10 +34,10 @@ def create(request: Request, db: DB):
 
 	db.add_enigme(name, input_type, question, answer, success_msg)
 
-	return "O.K.! <a href='index.html'>return</a>"
+	return "O.K.! <a href='./'>return</a>"
 
 
-def get(name: str, db: DB):
+def get(name: str):
 	input_type, question, _, _ = db.get_enigme(name)
 
 	image = True
@@ -52,19 +53,14 @@ def get(name: str, db: DB):
 			image=image)
 		
 
-def answer(enigme: str, request: Request, db: DB):
-	if len(request.form) == 0:
-		return "TEMP"
-	
-	print(request.form)
-
+def answer(enigme: str, request: Request):
 	team = request.cookies.get("team", "Sans Team")
 
 	resp = "%%IMAGE%%"
 	image = request.files.get("resp")
 	if image is not None:
 		ext = image.filename.split(".")[-1]
-		image.save(data_path+"images/"+team+"_"+enigme+"."+ext)
+		image.save(data_path+"images/"+team.replace(" ", "_")+"_"+enigme.replace(" ", "_")+".png")
 	else:
 		resp = request.form.get("resp")
 
@@ -76,3 +72,27 @@ def answer(enigme: str, request: Request, db: DB):
 		return f"<div class='correct'>{success_msg}</div>"
 	else:
 		return "<div class='incorrect'>WRONG</div>"
+
+
+def render_table_enigmes(name: str):
+	data = [list(row) for row in db.get_answers_from_enigme(name)]
+	data.sort(key=lambda x: x[-1])
+	for row in data:
+		row[-1] = str(datetime.fromtimestamp(int(row[-1])/1_000_000_000))
+		if row[1] == "%%IMAGE%%":
+			enigme = name.replace(" ", "_")
+			team = row[0].replace(" ", "_")
+			row[1] = "<img src='/data/images/"+team+"_"+enigme+".png'>"
+	return render("tableau.html", header=["team", "réponse", "temps"], rows=data)
+
+
+def render_table_team(name: str):
+	data = [list(row) for row in db.get_answers_from_team(name)]
+	data.sort(key=lambda x: int(x[-1]))
+	for row in data:
+		row[-1] = str(datetime.fromtimestamp(int(row[-1])/1_000_000_000))
+		if row[1] == "%%IMAGE%%":
+			team = name.replace(" ", "_")
+			enigme = row[0].replace(" ", "_")
+			row[1] = "<img src='/data/images/"+team+"_"+enigme+".png'>"
+	return render("tableau.html", header=["énigme", "réponse", "temps"], rows=data)

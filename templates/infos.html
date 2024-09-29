@@ -1,0 +1,18 @@
+<html>
+	<head>
+		<title>
+			{{ name }}
+		</title>
+		<script src="/assets/js/htmx.min.js"></script>
+		<link rel="stylesheet" href="/assets/styles/style.css"/>
+	</head>
+	<body>
+		{% if team %}
+		<h1>{{name}}</h1>
+		{% else %}
+		<h1><a href="/enigme/{{name}}">{{name}}</a></h1>
+		{% endif %}
+		<div hx-trigger="load every 10s" hx-swap="innerHTML" hx-get="/infos/{{type}}/{{name}}">
+		</div>
+	</body>
+</html>
