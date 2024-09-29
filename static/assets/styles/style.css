@@ -1,0 +1,23 @@
+body {
+	text-align: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+
+table, th, td {
+	border: 1px solid;
+}
+
+.result-box {
+	width: 20%;
+}
+
+.correct {
+	background-color: green;
+}
+
+.incorrect {
+	background-color: red;
+}
