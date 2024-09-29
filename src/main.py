@@ -1,4 +1,6 @@
 from os import environ as env
+from pathlib import Path
+from hashlib import sha256
 
 from flask import Flask, request, make_response, redirect, url_for
 from werkzeug.utils import secure_filename
@@ -19,8 +21,7 @@ templates_path = env["TEMPLATE_PATH"]
 data_path = env["DATABASE_PATH"]
 db_path = data_path+"data.db"
 
-# hashed_password = str(hash(admin_password))
-hashed_password = admin_password
+hashed_password = sha256(bytes(admin_password, "utf-8")).hexdigest()
 
 
 @app.get("/")
@@ -50,6 +51,16 @@ def login():
 	return resp
 
 
+@app.get("/checkadmin")
+def check_admin():
+	if verify_login(request.cookies, hashed_password):
+		return """
+		Askip t'es admin! tu peux accéder à ton espace admin <a href=/admin>juste ici</a>!
+		"""
+	else:
+		return ""
+
+
 @app.get("/admin/")
 @app.get("/admin/<path:subpath>")
 def admin(subpath=""):
@@ -60,7 +71,7 @@ def admin(subpath=""):
 
 @app.get("/<path:subpath>")
 def get_static(subpath):
-	path = f"{static_path}/{subpath}"
+	path = f"{static_path}{subpath}"
 	try:
 		return file_content(path)
 	except IsADirectoryError:
@@ -95,6 +106,11 @@ def answer_enigme(name):
 		return enigmes.answer(name, request, db)
 	finally:
 		db.connection.close()
+
+
+@app.get("/enigme/<string:name>/status")
+def status_enigme(name):
+	return "<div class='correct'>t'as déjà résolu batard</div>"
 
 
 @app.get("/data/images/<path:subpath>")

@@ -53,6 +53,11 @@ def get(name: str, db: DB):
 		
 
 def answer(enigme: str, request: Request, db: DB):
+	if len(request.form) == 0:
+		return "TEMP"
+	
+	print(request.form)
+
 	team = request.cookies.get("team", "Sans Team")
 
 	resp = "%%IMAGE%%"
@@ -68,6 +73,6 @@ def answer(enigme: str, request: Request, db: DB):
 	if resp == correct_resp:
 		t = time.time_ns()
 		db.add_answer(team, enigme, resp, t)
-		return success_msg
+		return f"<div class='correct'>{success_msg}</div>"
 	else:
-		return "WRONG"
+		return "<div class='incorrect'>WRONG</div>"

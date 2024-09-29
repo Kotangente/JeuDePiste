@@ -47,7 +47,7 @@ class DB:
 		res = self.cursor.execute("SELECT name FROM teams")
 		return [elem[0] for elem in res.fetchall()]
 	
-	def get_answers_from_team(self, team: str) -> list[tuple]:
+	def get_answers_from_team(self, team: str) -> list[tuple[str, str, str]]:
 		res = self.cursor.execute("""
 			SELECT enigme, answer, time
 			FROM reponses
@@ -56,7 +56,7 @@ class DB:
 
 		return res.fetchall()
 	
-	def get_answers_from_enigme(self, enigme: str) -> list[tuple]:
+	def get_answers_from_enigme(self, enigme: str) -> list[tuple[str, str, str]]:
 		res = self.cursor.execute("""
 			SELECT team, answer, time
 			FROM reponses
@@ -71,7 +71,7 @@ def db_placeholder_populate(db: DB):
 	teams = ["Migra", "Kotangente", "Linux", "Electro", "quoicoubeh"]
 
 	for enigme in enigmes:
-		db.add_enigme(enigme, "text", f"{enigme}???")
+		db.add_enigme(enigme, "text", f"{enigme}???", "42", "KOTANBRAVO")
 
 	for team in teams:
 		db.add_team(team)
