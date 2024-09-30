@@ -1,5 +1,6 @@
 CREATE TABLE enigmes (
-	name VARCHAR(255) PRIMARY KEY,
+	id VARCHAR(255) PRIMARY KEY,
+	name VARCHAR(255),
 	input_type VARCHAR(255),
 	question VARCHAR,
 	answer VARCHAR,

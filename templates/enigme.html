@@ -9,21 +9,21 @@
 	<body>
 		<h1>{{name}}</h1>
 		<form
-			hx-post="{{name}}/answer"
+			hx-post="{{id}}/answer"
 			hx-target=".result-box"
 			hx-swap="innerHTML"
 			enctype="multipart/form-data">
 
 			<label for="resp">{{question}}</label><br>
 			{% if image %}
-			<img src="/data/images/enigme_{{name}}.png" alt="énigme"><br>
+			<img src="/data/images/enigme_{{id}}" alt="énigme"><br>
 			{% endif %}
 			<input type="{{input_type}}" name="resp"><br>
 			<input type="submit" value="GO">
 		</form>
 		<div
 			class="result-box"
-			hx-get="{{name}}/status"
+			hx-get="{{id}}/status"
 			hx-trigger="load"
 			hx-swap="innerHTML"
 			></div>

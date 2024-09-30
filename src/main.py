@@ -92,48 +92,50 @@ def create_enigme():
 	return enigmes.create(request)
 
 
-@app.get("/enigme/<string:name>")
-def get_enigme(name):
-	return enigmes.get(name)
+@app.get("/enigme/<string:id>")
+def get_enigme(id):
+	return enigmes.get(id)
 
 
-@app.post("/enigme/<string:name>/answer")
-def answer_enigme(name):
-	return enigmes.answer(name, request)
+@app.post("/enigme/<string:id>/answer")
+def answer_enigme(id):
+	return enigmes.answer(id, request)
 
 
-@app.get("/enigme/<string:name>/status")
-def status_enigme(name):
+@app.get("/enigme/<string:id>/status")
+def status_enigme(id):
 	return "<div class='correct'>t'as déjà résolu batard</div>"
 
 
-@app.get("/enigmes")
+@app.get("/infos/enigmes")
 def get_enigmes():
-	return "".join([f"<tr><td><a href='{url_for('enigme_data_page', name=enigme)}'>{enigme}</a></td>"\
-				 f"<td><button hx-delete='/enigme/{enigme}'"\
-				 f"hx-confirm='Supprimer l'énigme \"{enigme}\"?'>delete</button></td></tr>"
+	return "".join([f"<tr><td><a href='"\
+				 f"{url_for('enigme_data_page', id=enigmes.get_id(enigme))}'>{enigme}</a></td>"\
+				 f"<td><button hx-delete='/enigme/{enigmes.get_id(enigme)}'"\
+				 f"hx-confirm='Supprimer l'énigme \"{enigme}\"?'>"
+				 f"delete</button></td></tr>"
 				 for enigme in DB.get_enigmes()])
 
 
-@app.get("/teams")
+@app.get("/infos/teams")
 def get_teams():
 	return "".join([f"<li><a href='{url_for('team_data_page', name=team)}'>{team}</a></li>"
 				 for team in DB.get_teams()])
 
 
-@app.get("/admin/enigmes/<string:name>")
-def enigme_data_page(name):
-	return render("infos.html", name=name, type="enigmes")
+@app.get("/admin/enigmes/<string:id>")
+def enigme_data_page(id):
+	return render("infos.html", name=enigmes.get_name(id), id=id, type="enigmes")
 
 
 @app.get("/admin/teams/<string:name>")
 def team_data_page(name):
-	return render("infos.html", name=name, type="teams", team=True)
+	return render("infos.html", name=name, id=name, type="teams", team=True)
 
 
-@app.get("/infos/enigmes/<string:name>")
-def get_enigme_data(name):
-	return enigmes.render_table_enigmes(name)
+@app.get("/infos/enigmes/<string:id>")
+def get_enigme_data(id):
+	return enigmes.render_table_enigmes(id)
 
 
 @app.get("/infos/teams/<string:name>")
@@ -141,9 +143,9 @@ def get_team_data(name):
 	return enigmes.render_table_team(name)
 
 
-@app.delete("/enigme/<string:name>")
-def delete_enigme(name):
-	DB.delete_enigme(name)
+@app.delete("/enigme/<string:id>")
+def delete_enigme(id):
+	DB.delete_enigme(id)
 
 
 @app.get("/data/images/<path:subpath>")

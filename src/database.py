@@ -3,6 +3,18 @@ from os import environ as env
 
 from flask import g
 
+from enigmes import get_id, get_name
+# from hashlib import sha256
+# def get_name(id: str) -> str:
+# 	data = get_enigme(id)
+# 	return "" if data is None else data[0]
+
+
+# def get_id(name: str) -> str:
+# 	return sha256(bytes(name, "utf-8")).hexdigest()
+
+out_of_context = False
+
 
 def get_db(db_path=None):
 	if db_path == None:
@@ -16,7 +28,10 @@ def get_db(db_path=None):
 
 
 def query_db(query, args=(), one=False):
-	db = get_db()
+	if out_of_context:
+		db = sqlite3.connect(env["DATABASE_PATH"]+"data.db")
+	else:
+		db = get_db()
 	cursor = db.execute(query, args)
 	res = cursor.fetchall()
 	cursor.close()
@@ -25,18 +40,19 @@ def query_db(query, args=(), one=False):
 
 
 def add_enigme(name: str, input_type: str, question: str="", answer: str="", success: str=""):
+	id = get_id(name)
 	query_db("""
-		INSERT INTO enigmes (name, input_type, question, answer, success_message)
-		VALUES (?, ?, ?, ?, ?)
-	""", (name, input_type, question, answer, success))
+		INSERT INTO enigmes (id, name, input_type, question, answer, success_message)
+		VALUES (?, ?, ?, ?, ?, ?)
+	""", (id, name, input_type, question, answer, success))
 
 
-def get_enigme(name: str) -> tuple[str, str, str, str]:
+def get_enigme(id: str) -> tuple[str, str, str, str, str]:
 	return query_db("""
-		SELECT input_type, question, answer, success_message
+		SELECT name, input_type, question, answer, success_message
 		FROM enigmes
-		WHERE name = ?
-	""", (name,), one=True)
+		WHERE id = ?;
+	""", (id,), one=True)
 
 
 def get_enigmes() -> list[str]:
@@ -44,16 +60,16 @@ def get_enigmes() -> list[str]:
 	return [elem[0] for elem in res]
 
 
-def add_answer(team_name: str, enigme: str, answer: str, time: int):
+def add_answer(team_name: str, enigme_id: str, answer: str, time: int):
 	if team_name not in get_teams():
 		raise sqlite3.DataError("team '%s' doesn't exist" % team_name)
-	elif get_enigme(enigme) is None:
-		raise sqlite3.DataError("enigme '%s' doesn't exist" % enigme)
+	elif (enigme := get_enigme(enigme_id)) is None:
+		raise sqlite3.DataError("enigme '%s' doesn't exist" % enigme_id)
 
 	query_db("""
 		INSERT INTO reponses (team, enigme, answer, time)
 		VALUES (?, ?, ?, ?)
-	""", (team_name, enigme, answer, time))
+	""", (team_name, enigme[0], answer, time))
 
 
 def add_team(team_name: str):
@@ -73,18 +89,22 @@ def get_answers_from_team(team: str) -> list[tuple[str, str, str]]:
 	""", (team,))
 
 
-def get_answers_from_enigme(enigme: str) -> list[tuple[str, str, str]]:
+def get_answers_from_enigme(enigme_id: str) -> list[tuple[str, str, str]]:
+	name = get_name(enigme_id)
 	return query_db("""
 		SELECT team, answer, time
 		FROM reponses
 		WHERE enigme = ?
-	""", (enigme,))
+	""", (name,))
 
 
-def delete_enigme(enigme: str):
+def delete_enigme(enigme_id: str):
 	query_db("""
-		DELETE FROM enigmes WHERE name = ?;
-	""", (enigme,))
+		DELETE FROM reponses WHERE enigme = ?;
+	""", (get_name(enigme_id),))
+	query_db("""
+		DELETE FROM enigmes WHERE id = ?;
+	""", (enigme_id,))
 
 
 def db_placeholder_populate():
@@ -102,7 +122,7 @@ def db_placeholder_populate():
 			answer = f"{team}: {enigme}"
 			time = hash(answer)
 			if time % 2 == 0:
-				add_answer(team, enigme, answer, time)
+				add_answer(team, get_id(enigme), answer, time)
 
 
 if __name__ == "__main__":
@@ -110,17 +130,5 @@ if __name__ == "__main__":
 
 	load_dotenv()
 
-	db = get_db()
-
-	# db_placeholder_populate()
-
-	# print(db.get_teams())
-
-	# print(get_answers_from_team("Migra"))
-	# print(get_answers_from_team("quoicoubeh"))
-	# print(get_answers_from_team("Kotangente"))
-
-	# print(get_answers_from_enigme("quatre"))
-	# print(get_answers_from_enigme("quatree"))
-
-	print(get_enigme("UN"))
+	out_of_context = True
+	db_placeholder_populate()
