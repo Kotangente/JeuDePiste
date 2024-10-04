@@ -10,14 +10,22 @@ table.data, th, td {
 	border: 1px solid;
 }
 
-img {
+.enigme-form * {
+	width: 100%;
+}
+
+.img-table {
 	width: 100px;
 	height: 100px;
 }
 
+.img-enigme {
+	max-width: 100%;
+}
+/* 
 .result-box {
 	width: 20%;
-}
+} */
 
 .correct {
 	background-color: green;

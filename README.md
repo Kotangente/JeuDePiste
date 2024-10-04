@@ -10,3 +10,4 @@
 - [ ] Nous empêcher de faire plusieurs fois la même question
 - [ ] Génération de QR Codes directement sur le site
 - [ ] Boté
+- [ ] LIMITER ADMIN ACCESS POUR CERTAINES REQUÊTES

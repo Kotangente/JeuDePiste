@@ -103,5 +103,18 @@ def render_table_team(name: str):
 		if row[1] == "%%IMAGE%%":
 			team = name.replace(" ", "_")
 			enigme = get_id(row[0])
-			row[1] = "<img src='/data/images/"+team+"_"+enigme+"'>"
+			row[1] = "<img class='img-table' src='/data/images/"+team+"_"+enigme+"'>"
 	return render("tableau.html", header=["énigme", "réponse", "temps"], rows=data)
+
+
+def init_message(team: str, enigme_id: str):
+	pass
+
+def answered_enigme(team: str, enigme: str):
+	answers = db.get_answers_from_team(team)
+
+	for enigme_name, _, _ in answers:
+		if enigme_name == enigme:
+			return True
+		
+	return False

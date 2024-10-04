@@ -107,6 +107,10 @@ def delete_enigme(enigme_id: str):
 	""", (enigme_id,))
 
 
+def add_fail(team: str, enigme: str):
+	pass
+
+
 def db_placeholder_populate():
 	enigmes = ["UN", "DEUX", "TROIS", "QUATRE"]
 	teams = ["Migra", "Kotangente", "Linux", "Electro", "quoicoubeh"]

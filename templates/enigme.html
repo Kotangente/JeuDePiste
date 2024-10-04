@@ -7,8 +7,8 @@
 		<link rel="stylesheet" href="/assets/styles/style.css"/>
 	</head>
 	<body>
-		<h1>{{name}}</h1>
-		<form
+		<!-- <h1>{{name}}</h1> -->
+		<form class="enigme-form"
 			hx-post="{{id}}/answer"
 			hx-target=".result-box"
 			hx-swap="innerHTML"
@@ -16,16 +16,17 @@
 
 			<label for="resp">{{question}}</label><br>
 			{% if image %}
-			<img src="/data/images/enigme_{{id}}" alt="énigme"><br>
+			<img class="img-enigme" src="/data/images/enigme_{{id}}" alt="énigme" /><br>
 			{% endif %}
+			<br>
 			<input type="{{input_type}}" name="resp"><br>
 			<input type="submit" value="GO">
+			<div
+				class="result-box"
+				hx-get="{{id}}/status"
+				hx-trigger="load"
+				hx-swap="innerHTML"
+				></div>
 		</form>
-		<div
-			class="result-box"
-			hx-get="{{id}}/status"
-			hx-trigger="load"
-			hx-swap="innerHTML"
-			></div>
 	</body>
 </html>
