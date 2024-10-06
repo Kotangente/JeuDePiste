@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     command: sh run.sh
     volumes:
-      - /home/docker/data/jdp-kotangente/:/code:rw
+      - /home/docker/data/jdp-kotangente/:/usr/src/app:rw
     restart: always
     labels:
       - "traefik.enable=true"
