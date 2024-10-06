@@ -65,6 +65,7 @@ def get(id: str):
 
 def answer(enigme_id: str, request: Request):
 	team = get_team(request.cookies)
+	enigme = get_name(enigme_id)
 
 	resp = "%%IMAGE%%"
 	image = request.files.get("resp")
@@ -81,7 +82,14 @@ def answer(enigme_id: str, request: Request):
 		db.add_answer(team, enigme_id, resp, t)
 		return f"<div class='correct'>{success_msg}</div>"
 	else:
-		return "<div class='incorrect'>WRONG</div>"
+		db.add_fail(team, enigme)
+		if db.get_fail(team, enigme)[0] < 3:
+			return "<div class='incorrect'>FAUX</div>"
+		else:
+			return f"""<div class='incorrect'
+							hx-trigger='every 1s'
+							hx-get='/enigme/{enigme_id}/status'
+							hx-swap='innerHTML'></div>"""
 
 
 def render_table_enigmes(id: str):
@@ -107,9 +115,6 @@ def render_table_team(name: str):
 	return render("tableau.html", header=["énigme", "réponse", "temps"], rows=data)
 
 
-def init_message(team: str, enigme_id: str):
-	pass
-
 def answered_enigme(team: str, enigme: str):
 	answers = db.get_answers_from_team(team)
 
@@ -118,3 +123,12 @@ def answered_enigme(team: str, enigme: str):
 			return True
 		
 	return False
+
+
+def in_fail_state(team: str, enigme: str):
+	count, t = db.get_fail(team, enigme)
+
+	if (dt := (time.time() - t*1e-9)) < (count-3)*60:
+		return (count-3)*60-dt
+	else:
+		return 0.0

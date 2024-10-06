@@ -99,18 +99,31 @@ def get_enigme(id):
 
 @app.post("/enigme/<string:id>/answer")
 def answer_enigme(id):
-	if enigmes.answered_enigme(get_team(request.cookies), enigmes.get_name(id)):
+	enigme = enigmes.get_name(id)
+	team = get_team(request.cookies)
+	if enigmes.answered_enigme(team, enigme)\
+			or enigmes.in_fail_state(team, enigme) > 0.0:
 		return status_enigme(id)
 	return enigmes.answer(id, request)
 
 
 @app.get("/enigme/<string:id>/status")
 def status_enigme(id):
-	if enigmes.answered_enigme(get_team(request.cookies), enigmes.get_name(id)):
-		return "<div class='correct'>t'as déjà résolu batard</div>"
-	elif False:
-		return "LOL TEMPS LOL"
+	team = get_team(request.cookies)
+	enigme = enigmes.get_name(id)
+	if enigmes.answered_enigme(team, enigme):
+		return "<div class='correct'>Vous avez déjà résolu cette énigme</div>"
+	elif (t := enigmes.in_fail_state(team, enigme)) > 0.0:
+		return f"""
+			<div class='incorrect'
+				hx-trigger='every 1s'
+				hx-get='/enigme/{id}/status'
+				hx-swap='innerHTML'>
+				Vous pouvez réessayer dans {int(t)} secondes.
+			</div>
+		"""
 	else:
+		print(t)
 		return ""
 
 
