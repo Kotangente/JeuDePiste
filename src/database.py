@@ -1,5 +1,6 @@
 import sqlite3
 from os import environ as env
+import time
 
 from flask import g
 
@@ -108,7 +109,31 @@ def delete_enigme(enigme_id: str):
 
 
 def add_fail(team: str, enigme: str):
-	pass
+	data = query_db("""
+		SELECT (attempt_count)
+		FROM fail
+		WHERE team = ? AND enigme = ?
+	""", (team, enigme))
+
+	if not data:
+		query_db("""
+			INSERT INTO fail (team, enigme, attempt_count, time)
+			VALUES (?, ?, ?, ?)
+		""", (team, enigme, 1, time.time_ns()))
+	else:
+		query_db("""
+			UPDATE fail
+			SET attempt_count = ?, time = ?
+			WHERE team = ? AND equipe = ?
+		""", (data[0]+1, time.time_ns(), team, enigme))
+
+
+def get_fail(team: str, enigme: str):
+	return query_db("""
+		SELECT (attempt_count, time)
+		FROM fail
+		WHERE team = ? AND enigme = ?
+	""", (team, enigme))
 
 
 def db_placeholder_populate():

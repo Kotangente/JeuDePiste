@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 import database as DB
 import enigmes
-from utils import render, verify_login, file_content, ERROR, INCORRECT_PASSWORD
+from utils import render, verify_login, file_content, get_team, ERROR, INCORRECT_PASSWORD
 
 
 app = Flask(__name__)
@@ -99,22 +99,37 @@ def get_enigme(id):
 
 @app.post("/enigme/<string:id>/answer")
 def answer_enigme(id):
+	if enigmes.answered_enigme(get_team(request.cookies), enigmes.get_name(id)):
+		return status_enigme(id)
 	return enigmes.answer(id, request)
 
 
 @app.get("/enigme/<string:id>/status")
 def status_enigme(id):
-	return "<div class='correct'>t'as déjà résolu batard</div>"
+	if enigmes.answered_enigme(get_team(request.cookies), enigmes.get_name(id)):
+		return "<div class='correct'>t'as déjà résolu batard</div>"
+	elif False:
+		return "LOL TEMPS LOL"
+	else:
+		return ""
 
 
 @app.get("/infos/enigmes")
 def get_enigmes():
-	return "".join([f"<tr><td><a href='"\
-				 f"{url_for('enigme_data_page', id=enigmes.get_id(enigme))}'>{enigme}</a></td>"\
-				 f"<td><button hx-delete='/enigme/{enigmes.get_id(enigme)}'"\
-				 f"hx-confirm='Supprimer l'énigme \"{enigme}\"?'>"
-				 f"delete</button></td></tr>"
-				 for enigme in DB.get_enigmes()])
+	return "".join([f"""
+		<tr>
+			<td>
+				<a href='{url_for('enigme_data_page', id=enigmes.get_id(enigme))}'>{enigme}</a>
+			</td>
+			<td>
+				<button hx-delete='/enigme/{enigmes.get_id(enigme)}'
+						hx-confirm='Supprimer l'énigme \"{enigme}\"?'>
+					delete
+				</button>
+			</td>
+		</tr>
+		"""
+		for enigme in DB.get_enigmes()])
 
 
 @app.get("/infos/teams")

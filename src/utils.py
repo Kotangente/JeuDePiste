@@ -19,3 +19,7 @@ def verify_login(cookies: dict[str, str], password: str):
 
 def file_content(path: str) -> bytes:
 	return open(path, "r+b").read()
+
+
+def get_team(cookies: dict[str, str]):
+	return cookies.get("team", "Sans Team")

@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from flask import Request
 
 import database as db
-from utils import render
+from utils import render, get_team
 
 
 data_path = env["DATABASE_PATH"]
@@ -64,7 +64,7 @@ def get(id: str):
 		
 
 def answer(enigme_id: str, request: Request):
-	team = request.cookies.get("team", "Sans Team")
+	team = get_team(request.cookies)
 
 	resp = "%%IMAGE%%"
 	image = request.files.get("resp")
