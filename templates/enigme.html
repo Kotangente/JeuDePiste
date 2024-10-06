@@ -20,14 +20,14 @@
 			<img class="img-enigme" src="/data/images/enigme_{{id}}" alt="énigme" /><br>
 			{% endif %}
 			<br>
-			<input type="{{input_type}}" name="resp"><br>
-			<input type="submit" value="GO">
 			<div
 				class="result-box"
 				hx-get="{{id}}/status"
 				hx-trigger="load"
 				hx-swap="innerHTML"
 				></div>
+			<input type="{{input_type}}" name="resp"><br>
+			<input type="submit" value="GO">	
 		</form>
 	</body>
 </html>
