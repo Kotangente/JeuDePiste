@@ -128,8 +128,9 @@ def answered_enigme(team: str, enigme: str):
 def in_fail_state(team: str, enigme: str):
 	count, t = db.get_fail(team, enigme)
 
+	dt = (time.time() - t*1e-9)
 	timeout = (count-2)*60-dt
-	if (dt := (time.time() - t*1e-9)) < timeout:
+	if dt < timeout:
 		return timeout
 	else:
 		return 0.0
