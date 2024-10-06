@@ -1,0 +1,22 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh run.sh
+    volumes:
+      - /home/docker/data/jdp-kotangente/:/code:rw
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jdp-kotangente.rule=Host(`jdp-kotangente.kapucl.be`)"
+      - "traefik.http.services.jdp-kotangente.loadbalancer.server.port=5000"
+      - "traefik.http.routers.jdp-kotangente.tls=true"
+      - "traefik.http.routers.jdp-kotangente.tls.certresolver=http"
+      - "traefik.http.routers.jdp-kotangente.entrypoints=websecure"
+    networks:
+      - external
+networks:
+  external:
+    name: external
+    external: true
