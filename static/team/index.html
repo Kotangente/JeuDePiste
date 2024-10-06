@@ -1,0 +1,20 @@
+<html>
+	<head>
+		<title>Jeu de KAP'iste</title>
+		<script src="/assets/js/htmx.min.js"></script>
+		<link rel="stylesheet" href="/assets/styles/style.css"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	</head>
+	<body>
+		<form hx-post="/team"
+			hx-target="#target"
+			hx-swap="innerHTML">
+			<label for="team">Entrez le nom de votre équipe!</label>
+			<br>
+			<input type="text" name="team" />
+			<br>
+			<input type="submit" value="entrer">
+		</form>
+		<p id="target"></p>
+	</body>
+</html>

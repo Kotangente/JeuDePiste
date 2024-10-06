@@ -179,3 +179,13 @@ def delete_enigme(id):
 @app.get("/data/images/<path:subpath>")
 def get_image(subpath):
 	return file_content(data_path+"images/"+secure_filename(subpath))
+
+
+@app.post("/team")
+def choose_team():
+	team = request.form.get("team")
+	DB.add_team(team)
+	
+	resp = make_response("ok!!")
+	resp.set_cookie("team", team)
+	return resp
