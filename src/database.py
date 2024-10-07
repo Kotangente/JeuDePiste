@@ -74,6 +74,8 @@ def add_answer(team_name: str, enigme_id: str, answer: str, time: int):
 
 
 def add_team(team_name: str):
+	if team_name in get_teams():
+		return
 	query_db("INSERT INTO teams VALUES (?)", (team_name,))
 
 
